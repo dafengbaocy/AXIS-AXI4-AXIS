@@ -92,8 +92,7 @@ initial begin
     AXIS_ARESETN = 1'b1;
 end
 
-maxis_v1_0_M00_AXIS#
-(
+maxis_v1_0_M00_AXIS#(
 	// Width of S_AXIS address bus. The slave accepts the read and write addresses of width C_M_AXIS_TDATA_WIDTH.
 	    .C_M_AXIS_TDATA_WIDTH (_DATA_WIDTH_)
 	// Start count is the number of clock cycles the master will wait before initiating/issuing any transaction.
