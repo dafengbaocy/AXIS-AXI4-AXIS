@@ -5,6 +5,11 @@ module axi_wr_ddr_tb();
 localparam _DATA_WIDTH_ = 32;
 localparam _PERIOD_ = 10;
 
+parameter 			PIXELS_HORIZONTAL 	= 1280	;
+parameter 			PIXELS_VERTICAL 	= 1024	;
+parameter			FRAME_DELAY			= 1		;
+parameter           M_AXI_BURST_LEN     = 16    ;
+
 
 parameter integer AXI_ID_WIDTH	        = 1    ;
 parameter integer AXI_DATA_WIDTH	    = 128  ;
@@ -94,9 +99,12 @@ end
 
 maxis_v1_0_M00_AXIS#(
 	// Width of S_AXIS address bus. The slave accepts the read and write addresses of width C_M_AXIS_TDATA_WIDTH.
-	    .C_M_AXIS_TDATA_WIDTH (_DATA_WIDTH_)
+	    .C_M_AXIS_TDATA_WIDTH 	(_DATA_WIDTH_           )
 	// Start count is the number of clock cycles the master will wait before initiating/issuing any transaction.
-	,   .C_M_START_COUNT (30)
+	,   .C_M_START_COUNT 		(30                     )
+	
+    ,   .PIXELS_HORIZONTAL 		(PIXELS_HORIZONTAL 		)
+    ,   .PIXELS_VERTICAL 		(PIXELS_VERTICAL 		)
 )u_maxis_v1_0_M00_AXIS(
 	// Global ports
 	    .M_AXIS_ACLK    		(AXIS_ACLK      )
@@ -117,26 +125,39 @@ maxis_v1_0_M00_AXIS#(
 
 
 axis2ddr_top #(
+        //the max depth of the fifo: 2^FIFO_AW
+        .FIFO_AW					(clogb2(PIXELS_HORIZONTAL) + 1  )
+		// AXI4Stream sink: Data Width
+    ,   .AXIS_DATA_WIDTH 			(32                             )
+		// AXI4 sink: Data Width as same as the data depth of the fifo
+    ,   .AXI4_DATA_WIDTH			(128                            )
+        // Horizontal resolution
+    ,   .pixels_horizontal 			(PIXELS_HORIZONTAL	            )
+        // Vertical resolution          
+    ,   .pixels_vertical 			(PIXELS_VERTICAL	            )
+        // Delay number of the frame, the max value is 1024(constrained by the bits of the counter)
+    ,   .frame_delay 				(FRAME_DELAY		            )
+
         // Base address of targeted slave
-	    .C_M_TARGET_SLAVE_BASE_ADDR	(32'h10000000)
+	,   .C_M_TARGET_SLAVE_BASE_ADDR	(32'h10000000)
 		// Burst Length. Supports 1, 2, 4, 8, 16, 32, 64, 128, 256 burst lengths
-	,   .C_M_AXI_BURST_LEN	    ( 16 )
-		// Thread ID Width
-	,   .C_M_AXI_ID_WIDTH	    ( 1 )
-		// Width of Address Bus
-	,   .C_M_AXI_ADDR_WIDTH	    ( AXI_ADDR_WIDTH )
-		// Width of Data Bus
-	,   .C_M_AXI_DATA_WIDTH	    ( AXI_DATA_WIDTH )
+	,   .C_M_AXI_BURST_LEN	        ( M_AXI_BURST_LEN               )
+		// Thread ID Width  
+	,   .C_M_AXI_ID_WIDTH	        ( 1 )
+		// Width of Address Bus 
+	,   .C_M_AXI_ADDR_WIDTH	        ( AXI_ADDR_WIDTH )
+		// Width of Data Bus    
+	,   .C_M_AXI_DATA_WIDTH	        ( AXI_DATA_WIDTH )
 		// Width of User Write Address Bus
-	,   .C_M_AXI_AWUSER_WIDTH	( 0 )
+	,   .C_M_AXI_AWUSER_WIDTH	    ( 0 )
 		// Width of User Read Address Bus
-	,   .C_M_AXI_ARUSER_WIDTH	( 0 )
+	,   .C_M_AXI_ARUSER_WIDTH	    ( 0 )
 		// Width of User Write Data Bus
-	,   .C_M_AXI_WUSER_WIDTH	( 0 )
+	,   .C_M_AXI_WUSER_WIDTH	    ( 0 )
 		// Width of User Read Data Bus
-	,   .C_M_AXI_RUSER_WIDTH	( 0 )
+	,   .C_M_AXI_RUSER_WIDTH	    ( 0 )
 	    // Width of User Response Bus
-	,   .C_M_AXI_BUSER_WIDTH	( 0 )
+	,   .C_M_AXI_BUSER_WIDTH	    ( 0 )
 )u_axis2ddr_top(
 //----------------------------------------------------
 // AXIS slave port

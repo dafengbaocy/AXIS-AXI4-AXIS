@@ -1,13 +1,10 @@
-module maxis_v1_0_M00_AXIS #
-(
+module maxis_v1_0_M00_AXIS #(
 	// Width of S_AXIS address bus. The slave accepts the read and write addresses of width C_M_AXIS_TDATA_WIDTH.
-	parameter integer C_M_AXIS_TDATA_WIDTH = 32,
+		parameter integer	C_M_AXIS_TDATA_WIDTH = 32
 	// Start count is the number of clock cycles the master will wait before initiating/issuing any transaction.
-	parameter integer C_M_START_COUNT = 3
-	
-    ,   parameter FRAME_DELAY = 2 //max 1024
-    ,   parameter PIXELS_HORIZONTAL = 1280
-    ,   parameter PIXELS_VERTICAL = 1024
+	,	parameter integer 	C_M_START_COUNT = 3
+    ,   parameter 			PIXELS_HORIZONTAL = 1280
+    ,   parameter 			PIXELS_VERTICAL = 1024
 )(
 	// Global ports
 	input wire M_AXIS_ACLK,
@@ -26,6 +23,9 @@ module maxis_v1_0_M00_AXIS #
 
 	output wire M_AXIS_USER
 );
+
+reg     [3:0]   frame_cnt;
+reg     [11:0]  vertical_cnt;
 
 assign M_AXIS_USER = M_AXIS_TVALID & M_AXIS_TREADY & (M_AXIS_TDATA[27:0] == 0);
 // Total number of output data
@@ -143,8 +143,6 @@ always @( posedge M_AXIS_ACLK )begin
 	end
 end
 
-reg     [3:0]   frame_cnt;
-reg     [11:0]  vertical_cnt;
 
 always@(posedge M_AXIS_ACLK) begin
     if(!M_AXIS_ARESETN) begin
